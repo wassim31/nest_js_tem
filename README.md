@@ -7,7 +7,7 @@
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
 
-*** Each module in the project includes its own set of unit and integration tests, covering core features and edge cases for consistent and predictable functionality. ***
+**Each module in the project includes its own set of unit and integration tests, covering core features and edge cases for consistent and predictable functionality**
 
 - **User Authentication & Authorization**
   - JWT-based authentication with HTTP-only cookies
