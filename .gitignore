@@ -34,3 +34,7 @@ coverage/
 
 # Docker
 docker-compose.override.yml
+
+# Upload files (but keep directory structure)
+uploads/*
+!uploads/.gitkeep

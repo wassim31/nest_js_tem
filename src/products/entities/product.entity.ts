@@ -18,6 +18,9 @@ export class Product {
     @Column({ nullable: true })
     description?: string;
 
+    @Column({ nullable: true })
+    imageUrl?: string;
+
     @Column()
     ownerId: string;
 
