@@ -1,26 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('products')
 export class Product {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+    @PrimaryGeneratedColumn()
+    id: number;
 
     @Column()
     name: string;
 
-    @Column('text', { nullable: true })
-    description: string;
-
-    @Column('decimal', { precision: 10, scale: 2 })
+    @Column('decimal')
     price: number;
 
-    @Column({ default: 0 })
-    stock: number;
+    @Column()
+    category: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+    @Column({ nullable: true })
+    description?: string;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+    @Column()
+    ownerId: string;
 
+    @ManyToOne(() => User, { onDelete: 'CASCADE' })
+    @JoinColumn({ name: 'ownerId' })
+    owner: User;
 }

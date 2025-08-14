@@ -1,4 +1,5 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
+import { UserRole } from '../users/entities/user-role.enum';
 
 export const CurrentUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
@@ -6,4 +7,6 @@ export const CurrentUser = createParamDecorator(
     return req.user as { userId: number; email: string; name: string; role: string };
   },
 );
+
+export const Roles = (...roles: UserRole[]) => SetMetadata('roles', roles);
 

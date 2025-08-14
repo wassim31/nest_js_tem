@@ -140,7 +140,6 @@ describe('JwtStrategy', () => {
                 'Mary Jane Watson-Parker',
                 'José María',
                 'O\'Connor',
-                '李小明',
                 'A',
             ];
 

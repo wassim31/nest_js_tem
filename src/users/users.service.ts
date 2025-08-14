@@ -39,6 +39,29 @@ export class UsersService {
         return this.safeUser(saved);
     }
 
+    // Method for seeding/admin purposes - allows creating owner users
+    async createSeed(dto: CreateUserDto & { role?: UserRole }) {
+        // Validate password strength
+        const passwordValidation = this.validatePasswordStrength(dto.password);
+        if (!passwordValidation.isValid) {
+            throw new ConflictException(`Password validation failed: ${passwordValidation.errors.join(', ')}`);
+        }
+
+        const existing = await this.repo.findOne({ where: { email: dto.email } });
+        if (existing) throw new ConflictException('Email already registered');
+
+        const passwordHash = await this.hashPassword(dto.password);
+        const user = this.repo.create({
+            name: dto.name,
+            email: dto.email,
+            password: passwordHash,
+            role: dto.role || UserRole.GUEST,
+        });
+
+        const saved = await this.repo.save(user);
+        return this.safeUser(saved);
+    }
+
     async findByEmailWithPassword(email: string): Promise<User | null> {
         return this.repo
             .createQueryBuilder('u')
