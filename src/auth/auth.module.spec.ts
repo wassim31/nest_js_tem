@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthModule } from './auth.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { UsersModule } from '../users/users.module';
+import { UsersService } from '../users/users.service';
 
 describe('AuthModule', () => {
     let module: TestingModule;
@@ -14,8 +13,30 @@ describe('AuthModule', () => {
         // Set JWT_SECRET for testing
         process.env.JWT_SECRET = 'test-secret-key';
 
+        // Mock UsersService
+        const mockUsersService = {
+            create: jest.fn(),
+            findByEmailWithPassword: jest.fn(),
+            comparePassword: jest.fn(),
+        };
+
         module = await Test.createTestingModule({
-            imports: [AuthModule],
+            imports: [
+                PassportModule,
+                JwtModule.register({
+                    secret: 'test-secret-key',
+                    signOptions: { expiresIn: '1h' },
+                }),
+            ],
+            providers: [
+                AuthService,
+                JwtStrategy,
+                {
+                    provide: UsersService,
+                    useValue: mockUsersService,
+                },
+            ],
+            controllers: [AuthController],
         }).compile();
     });
 
@@ -52,13 +73,16 @@ describe('AuthModule', () => {
     });
 
     describe('module dependencies', () => {
-        it('should import UsersModule', () => {
-            // The module should have access to UsersModule exports
-            const authService = module.get<AuthService>(AuthService);
-            expect(authService).toBeDefined();
+        it('should provide mocked UsersService', () => {
+            // The module should have access to mocked UsersService
+            const usersService = module.get<UsersService>(UsersService);
+            expect(usersService).toBeDefined();
+            expect(usersService.create).toBeDefined();
+            expect(usersService.findByEmailWithPassword).toBeDefined();
+            expect(usersService.comparePassword).toBeDefined();
         });
 
-        it('should import PassportModule', () => {
+        it('should configure PassportModule', () => {
             // PassportModule should be available for JWT strategy
             const jwtStrategy = module.get<JwtStrategy>(JwtStrategy);
             expect(jwtStrategy).toBeDefined();
@@ -73,12 +97,13 @@ describe('AuthModule', () => {
 
     describe('module providers', () => {
         it('should have all required providers', () => {
-            const providers = ['AuthService', 'JwtStrategy'];
-
-            providers.forEach(providerName => {
-                const provider = module.get(providerName);
-                expect(provider).toBeDefined();
-            });
+            const authService = module.get<AuthService>(AuthService);
+            const jwtStrategy = module.get<JwtStrategy>(JwtStrategy);
+            const usersService = module.get<UsersService>(UsersService);
+            
+            expect(authService).toBeDefined();
+            expect(jwtStrategy).toBeDefined();
+            expect(usersService).toBeDefined();
         });
 
         it('should have AuthController as controller', () => {

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Response } from 'express';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -113,21 +114,39 @@ describe('AuthController', () => {
       access_token: 'jwt-token-123',
     };
 
-    it('should login user successfully', async () => {
+    let mockResponse: Partial<Response>;
+
+    beforeEach(() => {
+      mockResponse = {
+        cookie: jest.fn().mockReturnThis(),
+      };
+    });
+
+    it('should login user successfully and set cookie', async () => {
       mockAuthService.login.mockResolvedValue(mockLoginResponse);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, mockResponse as Response);
 
       expect(authService.login).toHaveBeenCalledWith(loginDto);
-      expect(result).toBe(mockLoginResponse);
+      expect(mockResponse.cookie).toHaveBeenCalledWith('jwt', 'jwt-token-123', {
+        httpOnly: true,
+        secure: false, // NODE_ENV is not 'production' in tests
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000,
+      });
+      expect(result).toEqual({ 
+        message: 'Login successful',
+        user: { email: loginDto.email }
+      });
     });
 
     it('should handle invalid credentials', async () => {
       const error = new UnauthorizedException('Invalid credentials');
       mockAuthService.login.mockRejectedValue(error);
 
-      await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login(loginDto, mockResponse as Response)).rejects.toThrow(UnauthorizedException);
       expect(authService.login).toHaveBeenCalledWith(loginDto);
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
     });
 
     it('should handle user not found', async () => {
@@ -139,8 +158,9 @@ describe('AuthController', () => {
         password: 'StrongPass123!',
       };
 
-      await expect(controller.login(invalidDto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login(invalidDto, mockResponse as Response)).rejects.toThrow(UnauthorizedException);
       expect(authService.login).toHaveBeenCalledWith(invalidDto);
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
     });
 
     it('should handle wrong password', async () => {
@@ -152,17 +172,20 @@ describe('AuthController', () => {
         password: 'WrongPassword123!',
       };
 
-      await expect(controller.login(wrongPasswordDto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login(wrongPasswordDto, mockResponse as Response)).rejects.toThrow(UnauthorizedException);
       expect(authService.login).toHaveBeenCalledWith(wrongPasswordDto);
+      expect(mockResponse.cookie).not.toHaveBeenCalled();
     });
 
-    it('should return proper token structure', async () => {
+    it('should return proper response structure', async () => {
       mockAuthService.login.mockResolvedValue(mockLoginResponse);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, mockResponse as Response);
 
-      expect(result).toHaveProperty('access_token');
-      expect(typeof result.access_token).toBe('string');
+      expect(result).toHaveProperty('message');
+      expect(result).toHaveProperty('user');
+      expect(result.message).toBe('Login successful');
+      expect(result.user.email).toBe(loginDto.email);
     });
   });
 
@@ -182,6 +205,7 @@ describe('AuthController', () => {
 
     it('should handle concurrent requests', async () => {
       mockAuthService.login.mockResolvedValue({ access_token: 'token' });
+      const mockRes = { cookie: jest.fn().mockReturnThis() } as unknown as Response;
 
       const loginDto: LoginDto = {
         email: 'test@example.com',
@@ -189,9 +213,9 @@ describe('AuthController', () => {
       };
 
       const promises = [
-        controller.login(loginDto),
-        controller.login(loginDto),
-        controller.login(loginDto),
+        controller.login(loginDto, mockRes),
+        controller.login(loginDto, mockRes),
+        controller.login(loginDto, mockRes),
       ];
 
       const results = await Promise.all(promises);
@@ -221,9 +245,10 @@ describe('AuthController', () => {
         email: 'valid@example.com',
         password: 'ValidPass123!',
       };
+      const mockRes = { cookie: jest.fn().mockReturnThis() } as unknown as Response;
       mockAuthService.login.mockResolvedValue({ access_token: 'token' });
 
-      await controller.login(validDto);
+      await controller.login(validDto, mockRes);
 
       expect(authService.login).toHaveBeenCalledWith(validDto);
     });
