@@ -21,78 +21,231 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **User Authentication & Authorization**
+  - JWT-based authentication with HTTP-only cookies
+  - Role-based access control (GUEST, OWNER)
+  - Secure password validation and hashing
 
-## Project setup
+- **Product Management**
+  - CRUD operations for products
+  - Image upload and storage functionality
+  - Category filtering and price sorting
+  - Owner-based product access control
 
+- **File Upload System**
+  - Image upload with validation (jpg, jpeg, png, gif)
+  - Automatic file naming with UUID
+  - 5MB file size limit
+  - Secure file serving
+
+- **API Documentation**
+  - Complete Swagger/OpenAPI documentation
+  - Interactive API testing interface
+  - Comprehensive request/response examples
+
+
+##  Prerequisites
+
+- Node.js (v16 or higher)
+- PostgreSQL
+- npm or yarn
+
+##  Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd nest_js_tem
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Setup**
+   
+   Create a `.env` file in the root directory:
+   ```env
+   # Database
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=your_username
+   DB_PASS=your_password
+   DB_NAME=your_database_name
+
+   # JWT
+   JWT_SECRET=your_super_secret_jwt_key
+   JWT_EXPIRES=1h
+
+   # Server
+   PORT=3000
+   NODE_ENV=development
+   CORS_ORIGIN=*
+   ```
+
+4. **Database Setup**
+     ``` sudo docker-compose up -d   ```
+
+## Running the Application
+
+### Development Mode
 ```bash
-$ npm install
+npm run start:dev
 ```
 
-## Compile and run the project
-
+### Production Mode
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run build
+npm run start:prod
 ```
 
-## Run tests
+The API will be available at `http://localhost:3000`
 
+## 📚 API Documentation
+
+Once the application is running, access the interactive Swagger documentation at:
+
+**http://localhost:3000/api**
+
+This provides:
+- Complete API endpoint documentation
+- Request/response schemas
+- Interactive testing interface
+- Authentication examples
+
+## Authentication
+
+The API uses JWT tokens stored in HTTP-only cookies for security.
+
+### Register a new user
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "StrongPass123!",
+    "role": "OWNER"
+  }'
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### Login
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "StrongPass123!"
+  }' \
+  -c cookies.txt
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The JWT token will be automatically stored in an HTTP-only cookie.
 
-## Resources
+##  Product Management
 
-Check out a few resources that may come in handy when working with NestJS:
+### Get all products
+```bash
+curl -X GET http://localhost:3000/products \
+  -b cookies.txt
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Filter products by category
+```bash
+curl -X GET "http://localhost:3000/products?category=Electronics&sort=asc" \
+  -b cookies.txt
+```
 
-## Support
+### Create a product with image
+```bash
+curl -X POST http://localhost:3000/products \
+  -H "Content-Type: multipart/form-data" \
+  -F "name=iPhone 14" \
+  -F "price=999.99" \
+  -F "category=Electronics" \
+  -F "description=Latest iPhone model" \
+  -F "image=@path/to/your/image.jpg" \
+  -b cookies.txt
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Update a product
+```bash
+curl -X PATCH http://localhost:3000/products/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Product Name",
+    "price": 1299.99
+  }' \
+  -b cookies.txt
+```
 
-## Stay in touch
+### Delete a product
+```bash
+curl -X DELETE http://localhost:3000/products/1 \
+  -b cookies.txt
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 👥 User Management
 
-## License
+### Get user by ID
+```bash
+curl -X GET http://localhost:3000/users/1
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Update user
+```bash
+curl -X PATCH http://localhost:3000/users/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Name",
+    "email": "newemail@example.com"
+  }'
+```
+
+
+### Run all tests
+```bash
+npm test
+```
+
+### Run tests in watch mode
+```bash
+npm run test:watch
+```
+
+### Run e2e tests
+```bash
+npm run test:e2e
+```
+
+## API Endpoints Summary
+
+### Authentication
+- `POST /auth/register` - Register new user
+- `POST /auth/login` - User login
+
+### Users
+- `POST /users` - Create user (alternative to register)
+- `GET /users/:id` - Get user by ID
+- `PATCH /users/:id` - Update user
+- `DELETE /users/:id` - Delete user
+
+### Products
+- `GET /products` - Get all products (with optional filtering)
+- `GET /products/:id` - Get product by ID
+- `POST /products` - Create product (with optional image upload)
+- `PATCH /products/:id` - Update product (with optional image upload)
+- `DELETE /products/:id` - Delete product
+- `GET /products/uploads/:filename` - Serve uploaded images
+
+## 🚀 Deployment
+
+### Environment Variables for Production
+```env
+NODE_ENV=production
+JWT_SECRET=your_production_jwt_secret
+DB_HOST=your_production_db_host
+# ... other production configs
+```

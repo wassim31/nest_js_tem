@@ -1,45 +1,53 @@
-import { IsNotEmpty, IsNumber, Min, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateProductDto {
+export class ProductResponseDto {
+    @ApiProperty({
+        example: 1,
+        description: 'Unique identifier for the product',
+    })
+    id: number;
+
     @ApiProperty({
         example: 'iPhone 14 Pro',
         description: 'Name of the product',
     })
-    @IsNotEmpty()
-    @IsString()
     name: string;
 
     @ApiProperty({
         example: 999.99,
         description: 'Price of the product in USD',
-        minimum: 0,
     })
-    @IsNumber()
-    @Min(0)
     price: number;
 
     @ApiProperty({
         example: 'Electronics',
         description: 'Category of the product',
     })
-    @IsNotEmpty()
-    @IsString()
     category: string;
 
     @ApiPropertyOptional({
         example: 'Latest iPhone with Pro features and advanced camera system',
-        description: 'Optional description of the product',
+        description: 'Description of the product',
     })
-    @IsOptional()
-    @IsString()
     description?: string;
 
     @ApiPropertyOptional({
         example: '/uploads/iphone-14-pro.jpg',
-        description: 'URL path to the product image (automatically set when uploading via form-data)',
+        description: 'URL path to the product image',
     })
-    @IsOptional()
-    @IsString()
     imageUrl?: string;
+
+    @ApiProperty({
+        example: 'e7b0a7a5-8b1a-4c9e-9d5a-1a2b3c4d5e6f',
+        description: 'ID of the user who owns this product',
+    })
+    ownerId: string;
+}
+
+export class ProductDeleteResponseDto {
+    @ApiProperty({
+        example: 'Product deleted',
+        description: 'Confirmation message',
+    })
+    message: string;
 }
