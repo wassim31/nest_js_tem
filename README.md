@@ -103,17 +103,11 @@ npm run start:prod
 
 The API will be available at `http://localhost:3000`
 
-## 📚 API Documentation
+##  API Documentation
 
 Once the application is running, access the interactive Swagger documentation at:
 
 **http://localhost:3000/api**
-
-This provides:
-- Complete API endpoint documentation
-- Request/response schemas
-- Interactive testing interface
-- Authentication examples
 
 ## Authentication
 
@@ -187,7 +181,7 @@ curl -X DELETE http://localhost:3000/products/1 \
   -b cookies.txt
 ```
 
-## 👥 User Management
+##  User Management
 
 ### Get user by ID
 ```bash
@@ -240,7 +234,7 @@ npm run test:e2e
 - `DELETE /products/:id` - Delete product
 - `GET /products/uploads/:filename` - Serve uploaded images
 
-## 🚀 Deployment
+##  Deployment
 
 ### Environment Variables for Production
 ```env
