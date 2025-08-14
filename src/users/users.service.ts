@@ -100,15 +100,6 @@ export class UsersService {
         return { message: 'User deleted successfully' };
     }
 
-    async updateRole(id: string, role: UserRole) {
-        const user = await this.repo.findOne({ where: { id } });
-        if (!user) throw new NotFoundException('User not found');
-
-        user.role = role;
-        const updatedUser = await this.repo.save(user);
-        return this.safeUser(updatedUser);
-    }
-
     private safeUser(user: User) {
         const { password, ...rest } = user;
         return rest;
